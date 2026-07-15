@@ -1,0 +1,48 @@
+{
+  "family": "fingpt-enterprise-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "2048",
+  "executionRoleArn": "REPLACE_WITH_EXECUTION_ROLE_ARN",
+  "taskRoleArn": "REPLACE_WITH_TASK_ROLE_ARN",
+  "containerDefinitions": [
+    {
+      "name": "fingpt-enterprise-api",
+      "image": "REPLACE_WITH_ECR_IMAGE_URI:latest",
+      "essential": true,
+      "portMappings": [{ "containerPort": 8000, "protocol": "tcp" }],
+      "environment": [
+        { "name": "ENVIRONMENT", "value": "production" },
+        { "name": "POSTGRES_HOST", "value": "REPLACE_WITH_RDS_ENDPOINT" },
+        { "name": "POSTGRES_PORT", "value": "5432" },
+        { "name": "POSTGRES_DB", "value": "fingpt_enterprise" },
+        { "name": "POSTGRES_USER", "value": "fingpt" },
+        { "name": "REDIS_URL", "value": "redis://REPLACE_WITH_REDIS_ENDPOINT:6379/0" },
+        { "name": "QDRANT_URL", "value": "http://qdrant.fingpt-enterprise.local:6333" },
+        { "name": "S3_BUCKET_DOCUMENTS", "value": "REPLACE_WITH_BUCKET_NAME" },
+        { "name": "AWS_REGION", "value": "ap-south-1" }
+      ],
+      "secrets": [
+        { "name": "JWT_SECRET_KEY", "valueFrom": "arn:aws:secretsmanager:ap-south-1:ACCOUNT_ID:secret:fingpt-enterprise/jwt-secret-key" },
+        { "name": "POSTGRES_PASSWORD", "valueFrom": "arn:aws:secretsmanager:ap-south-1:ACCOUNT_ID:secret:fingpt-enterprise/db-password" },
+        { "name": "OPENAI_API_KEY", "valueFrom": "arn:aws:secretsmanager:ap-south-1:ACCOUNT_ID:secret:fingpt-enterprise/openai-api-key" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/fingpt-enterprise",
+          "awslogs-region": "ap-south-1",
+          "awslogs-stream-prefix": "api"
+        }
+      },
+      "healthCheck": {
+        "command": ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')\" || exit 1"],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 20
+      }
+    }
+  ]
+}
