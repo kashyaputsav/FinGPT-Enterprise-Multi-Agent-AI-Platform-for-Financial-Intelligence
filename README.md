@@ -1,103 +1,242 @@
-# FinGPT Enterprise
+# 🚀 FinGPT Enterprise
+### Production-Grade Multi-Agent AI Platform for Financial Intelligence
 
-Production-grade multi-agent Generative AI platform for financial intelligence — fraud
-investigation, loan underwriting, compliance review, document analysis, and a
-personalized financial assistant, built on LangGraph, FastAPI, and a hybrid RAG
-pipeline over Qdrant + PostgreSQL.
+FinGPT Enterprise is a production-ready **Multi-Agent Generative AI platform** that automates complex financial workflows using **Large Language Models (LLMs), LangGraph, Hybrid RAG, FastAPI, Docker, and AWS**.
 
-## Architecture
+The platform intelligently routes financial requests across specialized AI agents capable of performing **fraud investigation, loan underwriting, compliance analysis, financial document intelligence, and personalized financial assistance**, delivering accurate, explainable, and enterprise-ready AI responses.
 
-```
-                        ┌─────────────────────┐
-                        │   ALB (HTTPS/443)   │
-                        └──────────┬──────────┘
-                                   │
-                        ┌──────────▼──────────┐
-                        │  ECS Fargate Service │
-                        │   (FastAPI app x N)  │
-                        └──────────┬──────────┘
-                 ┌─────────────────┼─────────────────┐
-                 │                 │                 │
-        ┌────────▼───────┐ ┌───────▼──────┐  ┌───────▼───────┐
-        │  RDS Postgres   │ │  Qdrant Cloud │  │  S3 (docs +   │
-        │  (metadata,     │ │  or ECS       │  │  embeddings   │
-        │   auth, audit)  │ │  self-hosted  │  │   cache)      │
-        └─────────────────┘ └──────────────┘  └───────────────┘
-                 │
-        ┌────────▼───────┐
-        │  ElastiCache    │
-        │  Redis (cache,  │
-        │  rate limiting) │
-        └─────────────────┘
-```
+---
 
-The orchestrator agent (LangGraph) routes each request to one of four specialist
-agents — **Fraud Investigation**, **Loan Underwriting**, **Compliance Review**, or
-**Financial Assistant** — each of which pulls grounded context from the RAG layer
-(hybrid dense + sparse retrieval, cross-encoder reranking, inline source citation)
-before generating a response.
+# ✨ Features
 
-## Repository layout
+- 🤖 Multi-Agent AI powered by LangGraph
+- 📄 Financial Document Intelligence
+- 💳 Fraud Investigation Agent
+- 🏦 Loan Underwriting Agent
+- 📜 Compliance Review Agent
+- 💬 AI Financial Assistant
+- 🔍 Hybrid RAG Pipeline
+- 🧠 Qdrant Vector Database
+- 📚 LlamaIndex Integration
+- ⚡ FastAPI REST APIs
+- 🔐 JWT Authentication
+- 📊 PostgreSQL Metadata Store
+- ⚡ Redis Caching
+- ☁ AWS Cloud Deployment
+- 🐳 Dockerized Architecture
+- 🚀 GitHub Actions CI/CD
+- 📝 Structured Logging & Monitoring
+
+---
+
+# 🏗 Architecture
 
 ```
-fingpt-enterprise/
-├── backend/                  # FastAPI application (see backend/README.md)
-│   ├── app/
-│   │   ├── core/              # config, security, logging, exceptions
-│   │   ├── api/v1/            # versioned REST routers
-│   │   ├── agents/            # LangGraph agent graph + nodes
-│   │   ├── rag/                # ingestion, embeddings, retriever, reranker
-│   │   ├── models/             # Pydantic schemas + SQLAlchemy models
-│   │   ├── db/                 # session, base, init
-│   │   ├── services/           # business logic layer
-│   │   └── utils/
-│   ├── tests/
-│   ├── alembic/                # DB migrations
+                            Client
+                               │
+                               ▼
+                   AWS Application Load Balancer
+                               │
+                               ▼
+                     FastAPI Backend (ECS)
+                               │
+                ┌──────────────┼──────────────┐
+                │              │              │
+                ▼              ▼              ▼
+        LangGraph Orchestrator │        Authentication
+                │
+     ┌──────────┼───────────┬───────────┬───────────┐
+     ▼          ▼           ▼           ▼
+ Fraud      Underwriting  Compliance  Financial
+ Agent         Agent         Agent    Assistant
+                    │
+                    ▼
+             Hybrid RAG Pipeline
+                    │
+     ┌──────────────┼──────────────┐
+     ▼              ▼              ▼
+ Qdrant        PostgreSQL        Redis
+(Vector DB)     Metadata         Cache
+                    │
+                    ▼
+                Amazon S3
+```
+
+---
+
+# 🧠 AI Workflow
+
+```
+User Query
+      │
+      ▼
+LangGraph Router
+      │
+      ▼
+Best Financial Agent
+      │
+      ▼
+Hybrid Retrieval
+(Dense + Sparse Search)
+      │
+      ▼
+Cross Encoder Re-ranking
+      │
+      ▼
+Large Language Model
+      │
+      ▼
+Grounded Financial Response
+```
+
+---
+
+# ⚙ Tech Stack
+
+| Category | Technologies |
+|-----------|--------------|
+| Programming | Python 3.11 |
+| Backend | FastAPI |
+| Agent Framework | LangGraph |
+| LLM Framework | LangChain |
+| RAG | LlamaIndex |
+| Vector Database | Qdrant |
+| Database | PostgreSQL |
+| Cache | Redis |
+| Authentication | JWT |
+| Containerization | Docker |
+| Cloud | AWS ECS, ECR, S3 |
+| Infrastructure | Terraform |
+| CI/CD | GitHub Actions |
+| Monitoring | CloudWatch |
+
+---
+
+# 📂 Project Structure
+
+```
+fingpt-enterprise
+│
+├── backend
+│   ├── alembic
+│   ├── app
+│   │   ├── agents
+│   │   ├── api
+│   │   ├── core
+│   │   ├── db
+│   │   ├── models
+│   │   ├── rag
+│   │   ├── services
+│   │   ├── utils
+│   │   └── main.py
+│   │
+│   ├── tests
 │   ├── Dockerfile
-│   └── requirements.txt
-├── infra/
-│   ├── docker-compose.yml      # local dev stack (api, postgres, qdrant, redis)
-│   └── aws/
-│       ├── terraform/          # VPC, ECS, RDS, ALB, ECR, IAM, Secrets Manager
-│       └── ecs/                # ECS task definition + deploy scripts
-├── .github/workflows/          # CI/CD (test → build → push ECR → deploy ECS)
-├── docs/
+│   ├── requirements.txt
+│   └── pyproject.toml
+│
+├── docs
 │   ├── ARCHITECTURE.md
 │   └── DEPLOYMENT.md
-└── scripts/                    # helper scripts (seed data, local bootstrap)
+│
+├── infra
+│   ├── aws
+│   │   ├── ecs
+│   │   └── terraform
+│   └── docker-compose.yml
+│
+├── scripts
+│
+├── .github
+│   └── workflows
+│
+├── .env.example
+├── .gitignore
+└── README.md
 ```
 
-## Quick start (local)
+---
+
+# 🚀 Quick Start
 
 ```bash
-cp .env.example .env                 # fill in secrets
+git clone https://github.com/yourusername/FinGPT-Enterprise.git
+
+cd FinGPT-Enterprise
+
+cp .env.example .env
+
 docker compose -f infra/docker-compose.yml up --build
-# API docs at http://localhost:8000/docs
 ```
 
-## Deploying to AWS
+Visit:
 
-See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for the full walkthrough
-(Terraform apply → ECR push → ECS service update). Summary:
+```
+http://localhost:8000/docs
+```
+
+---
+
+# ☁ AWS Deployment
+
+Infrastructure is provisioned using **Terraform**.
 
 ```bash
 cd infra/aws/terraform
-terraform init
-terraform apply -var-file=prod.tfvars
 
-# CI/CD (GitHub Actions) builds the image, pushes to ECR, and triggers
-# an ECS rolling deployment on every push to `main`.
+terraform init
+
+terraform apply
 ```
 
-## Tech stack
+Deployment pipeline automatically:
 
-| Layer            | Technology |
-|------------------|------------|
-| API              | FastAPI, Uvicorn/Gunicorn |
-| Agent Orchestration | LangGraph, LangChain |
-| RAG              | Qdrant (hybrid search), LlamaIndex, sentence-transformers reranker |
-| Data             | PostgreSQL (RDS), Redis (ElastiCache), S3 |
-| Auth             | JWT (OAuth2 password + refresh flow) |
-| Infra            | Docker, ECS Fargate, ALB, Terraform |
-| CI/CD            | GitHub Actions → ECR → ECS |
-| Observability    | Structured JSON logging, CloudWatch, Prometheus-compatible `/metrics` |
+- Runs unit tests
+- Builds Docker image
+- Pushes image to Amazon ECR
+- Deploys to Amazon ECS
+- Performs rolling updates
+
+---
+
+# 🔐 Enterprise Features
+
+- Multi-Agent AI Architecture
+- Hybrid Retrieval-Augmented Generation (RAG)
+- Source-grounded Responses
+- JWT Authentication
+- Audit Logging
+- Dockerized Deployment
+- Infrastructure as Code
+- Automated CI/CD
+- Modular Service Architecture
+- Production-ready REST APIs
+
+---
+
+# 📈 Future Improvements
+
+- MCP Server Integration
+- Multi-LLM Routing
+- Human-in-the-Loop Approval
+- Streaming Responses
+- Prompt Versioning
+- MLflow Tracking
+- Kafka Event Processing
+- Evaluation Dashboard
+
+---
+
+# 👨‍💻 Author
+
+**Utsav Kashyap**
+
+AI Engineer | Data Scientist | GenAI Developer
+
+### Skills
+
+Python • Machine Learning • Deep Learning • LLMs • LangGraph • LangChain • RAG • FastAPI • Docker • AWS • PostgreSQL • Qdrant • Terraform • CI/CD
+
+---
+
+⭐ If you found this project useful, consider giving it a star.
